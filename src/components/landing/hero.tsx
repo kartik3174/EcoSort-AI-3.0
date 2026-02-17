@@ -19,13 +19,13 @@ export function Hero() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 mt-6">
               <Button asChild size="lg" className="transition-transform hover:scale-105">
-                <Link href="/citizen/dashboard">
+                <Link href="/login?redirect=/citizen/dashboard">
                   <User />
                   Continue as Citizen
                 </Link>
               </Button>
               <Button asChild size="lg" variant="secondary" className="transition-transform hover:scale-105">
-                <Link href="/official/overview">
+                <Link href="/login?redirect=/official/overview">
                   <Building />
                   Continue as City Official
                 </Link>

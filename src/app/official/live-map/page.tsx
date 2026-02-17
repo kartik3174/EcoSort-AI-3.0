@@ -1,85 +1,33 @@
-"use client";
-
-import { useState, useMemo } from "react";
-import { PageHeader } from "@/components/shared/page-header";
-import { GoogleMap } from "@/components/shared/google-map";
-import { Button } from "@/components/ui/button";
-import { MapPin } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { getReports } from "@/app/official/reports/actions";
 import { mapReportsData, type MapReport } from "@/lib/data";
+import LiveMapClient from "./live-map-client";
 
-type Filter = "Still There" | "Cleaned" | "Hazardous";
+export const dynamic = 'force-dynamic';
 
-export default function LiveMapPage() {
-  const [activeFilters, setActiveFilters] = useState<Filter[]>([]);
-  const [selectedReport, setSelectedReport] = useState<MapReport | null>(null);
+export default async function LiveMapPage() {
+  const firebaseReports = await getReports();
 
-  const filters: Filter[] = ["Still There", "Cleaned", "Hazardous"];
+  const mappedReports: MapReport[] = firebaseReports
+    .filter(r => r.lat && r.lng)
+    .map(r => {
+      let category: MapReport['category'] = "Still There";
+      if (r.status === 'cleaned') category = "Cleaned";
+      else if (r.isHazardous) category = "Hazardous";
+      else if (r.wasteType.toLowerCase().includes('recycl')) category = "Recyclable";
 
-  const pinColors: Record<string, string> = {
-    "Still There": "bg-red-500",
-    "Cleaned": "bg-green-500",
-    "Hazardous": "bg-yellow-500",
-  };
+      return {
+        id: r.id,
+        location: r.location,
+        status: r.status,
+        date: r.createdAt ? new Date(r.createdAt.seconds * 1000).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+        lat: r.lat!,
+        lng: r.lng!,
+        category: category
+      };
+    });
 
-  const handleFilterClick = (filter: Filter) => {
-    setActiveFilters((prev) =>
-      prev.includes(filter)
-        ? prev.filter((f) => f !== filter)
-        : [...prev, filter]
-    );
-  };
+  const displayReports = [...mappedReports, ...mapReportsData];
 
-  const filteredReports = useMemo(() => {
-    if (activeFilters.length === 0) {
-      return mapReportsData;
-    }
-    return mapReportsData.filter((report) =>
-      activeFilters.includes(report.category as Filter)
-    );
-  }, [activeFilters]);
-
-  const handleGetDirections = () => {
-    if (selectedReport) {
-      const { lat, lng } = selectedReport;
-      const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
-      window.open(url, "_blank");
-    }
-  };
-
-  return (
-    <div className="flex flex-col h-full">
-      <PageHeader
-        title="Live Litter Map"
-        description="Monitor all reports across the city and identify high-density zones."
-      />
-      <div className="flex flex-wrap gap-4 mb-4 items-center">
-        <div className="flex flex-wrap gap-2">
-          {filters.map((filter) => (
-            <Button
-              key={filter}
-              variant={activeFilters.includes(filter) ? "default" : "outline"}
-              onClick={() => handleFilterClick(filter)}
-              className="transition-colors"
-            >
-              <span
-                className={cn("w-3 h-3 rounded-full mr-2", pinColors[filter])}
-              ></span>
-              {filter}
-            </Button>
-          ))}
-        </div>
-        <Button onClick={handleGetDirections} disabled={!selectedReport}>
-          <MapPin /> Get Directions
-        </Button>
-      </div>
-      <div className="flex-1">
-        <GoogleMap
-          reports={filteredReports}
-          selectedReportId={selectedReport?.id || null}
-          onMarkerSelect={setSelectedReport}
-        />
-      </div>
-    </div>
-  );
+  return <LiveMapClient reports={displayReports} />;
 }
+

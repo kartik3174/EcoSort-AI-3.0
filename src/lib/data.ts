@@ -1,17 +1,17 @@
 import type { ChartConfig } from "@/components/ui/chart"
 
 export const citizenStats = [
-  { title: "Reports Submitted", value: "142", icon: "FileText" },
-  { title: "Locations Cleaned", value: "89", icon: "MapPin" },
-  { title: "Eco Contribution Score", value: "1,280", icon: "Leaf" },
-  { title: "Pending Reports", value: "12", icon: "Hourglass" },
+  { title: "Reports Submitted", value: "142", icon: "FileText" as const },
+  { title: "Locations Cleaned", value: "89", icon: "MapPin" as const },
+  { title: "Eco Contribution Score", value: "1,280", icon: "Leaf" as const },
+  { title: "Pending Reports", value: "12", icon: "Hourglass" as const },
 ];
 
 export const officialStats = [
-  { title: "Total Reports", value: "3,456", icon: "ClipboardList" },
-  { title: "Pending Cleanup", value: "214", icon: "Trash2" },
-  { title: "Hazard Alerts", value: "17", icon: "AlertTriangle" },
-  { title: "Cleaned Locations", value: "2,890", icon: "CheckCircle" },
+  { title: "Total Reports", value: "3,456", icon: "ClipboardList" as const },
+  { title: "Pending Cleanup", value: "214", icon: "Trash2" as const },
+  { title: "Hazard Alerts", value: "17", icon: "AlertTriangle" as const },
+  { title: "Cleaned Locations", value: "2,890", icon: "CheckCircle" as const },
 ];
 
 export const myReportsData = [
@@ -43,16 +43,16 @@ export const mapReportsData: MapReport[] = [
 ];
 
 export const allReportsData = [
-  { id: "REP301", location: "Adyar River Bank", status: "Pending", priority: "High", time: "2 hours ago", image: "https://picsum.photos/seed/301/200/150", wasteType: "Hazardous" },
-  { id: "REP302", location: "Mylapore Tank", status: "Pending", priority: "Medium", time: "5 hours ago", image: "https://picsum.photos/seed/302/200/150", wasteType: "Recyclable" },
-  { id: "REP303", location: "Velachery Main Road", status: "In Progress", priority: "Low", time: "1 day ago", image: "https://picsum.photos/seed/303/200/150", wasteType: "General" },
-  { id: "REP304", location: "Nungambakkam High Rd", status: "Cleaned", priority: "N/A", time: "2 days ago", image: "https://picsum.photos/seed/304/200/150", wasteType: "General" },
+  { id: "REP301", location: "Adyar River Bank", status: "Pending", priority: "High", time: "2 hours ago", image: "https://picsum.photos/seed/adyar/400/250", wasteType: "Hazardous" },
+  { id: "REP302", location: "Mylapore Tank", status: "Pending", priority: "Medium", time: "5 hours ago", image: "https://picsum.photos/seed/mylapore/400/250", wasteType: "Recyclable" },
+  { id: "REP303", location: "Velachery Main Road", status: "In Progress", priority: "Low", time: "1 day ago", image: "https://picsum.photos/seed/velachery/400/250", wasteType: "General" },
+  { id: "REP304", location: "Nungambakkam High Rd", status: "Cleaned", priority: "N/A", time: "2 days ago", image: "https://picsum.photos/seed/nungam/400/250", wasteType: "General" },
 ];
 
 export const alertsData = [
-    { id: "HAZ01", type: "Broken Glass", location: "Adyar River Bank", time: "2 hours ago", severity: "High" },
-    { id: "HAZ02", type: "Used Batteries", location: "Ekkaduthangal", time: "8 hours ago", severity: "Medium" },
-    { id: "HAZ03", type: "Medical Waste", location: "Porur Junction", time: "1 day ago", severity: "Critical" },
+  { id: "HAZ01", type: "Broken Glass", location: "Adyar River Bank", time: "2 hours ago", severity: "High" },
+  { id: "HAZ02", type: "Used Batteries", location: "Ekkaduthangal", time: "8 hours ago", severity: "Medium" },
+  { id: "HAZ03", type: "Medical Waste", location: "Porur Junction", time: "1 day ago", severity: "Critical" },
 ];
 
 export type CleanupTask = {

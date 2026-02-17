@@ -1,9 +1,9 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { PageHeader } from '@/components/shared/page-header';
-import { StatCard } from '@/components/shared/stat-card';
 import { citizenStats } from '@/lib/data';
 import { Camera, Map as MapIcon } from 'lucide-react';
+import { UnifiedLiveStatsGrid } from '@/components/shared/unified-live-stats';
 
 export default function CitizenDashboardPage() {
   return (
@@ -12,11 +12,9 @@ export default function CitizenDashboardPage() {
         title="Welcome, Citizen!"
         description="Here's your contribution to a cleaner city at a glance."
       />
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
-        {citizenStats.map((stat) => (
-          <StatCard key={stat.title} {...stat} />
-        ))}
-      </div>
+
+      <UnifiedLiveStatsGrid initialStats={citizenStats} userType="citizen" />
+
       <div className="flex flex-col sm:flex-row gap-4">
         <Button asChild size="lg" className="transition-transform hover:scale-105">
           <Link href="/citizen/tag-litter">

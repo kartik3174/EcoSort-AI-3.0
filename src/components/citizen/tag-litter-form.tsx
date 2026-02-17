@@ -20,18 +20,28 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { analyzeLitterImage } from "@/app/citizen/tag-litter/actions";
+import { submitReport } from "@/app/citizen/tag-litter/report-action";
 import type { WasteAnalysisOutput } from "@/ai/flows/hazardous-waste-detection-flow";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { auth } from "@/lib/firebase";
+import { onAuthStateChanged } from "@firebase/auth";
 
 type SubmissionStatus = "idle" | "success";
 type Tag = "still_there" | "picked_up" | "hazardous" | "recyclable";
 
 export function TagLitterForm() {
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, u => setUser(u));
+    return () => unsub();
+  }, []);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageDataUri, setImageDataUri] = useState<string | null>(null);
   const [description, setDescription] = useState("");
@@ -43,6 +53,8 @@ export function TagLitterForm() {
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
   const [location, setLocation] = useState<string | null>(null);
+  const [manualAddress, setManualAddress] = useState("");
+  const [coords, setCoords] = useState<{ lat: number, lng: number } | null>(null);
   const [isLocating, setIsLocating] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -58,6 +70,7 @@ export function TagLitterForm() {
           const { latitude, longitude } = position.coords;
           const newLocation = `Lat: ${latitude.toFixed(5)}, Lon: ${longitude.toFixed(5)}`;
           setLocation(newLocation);
+          setCoords({ lat: latitude, lng: longitude });
           setIsLocating(false);
           toast({
             title: "Location Detected",
@@ -77,11 +90,11 @@ export function TagLitterForm() {
       );
     } else {
       setLocation("Geolocation is not supported by your browser.");
-       toast({
-          variant: "destructive",
-          title: "Location Not Supported",
-          description: "Your browser does not support geolocation.",
-        });
+      toast({
+        variant: "destructive",
+        title: "Location Not Supported",
+        description: "Your browser does not support geolocation.",
+      });
     }
   };
 
@@ -97,9 +110,9 @@ export function TagLitterForm() {
           setTag("still_there");
         }
         toast({
-            title: `AI Analysis: ${result.wasteType}`,
-            description: result.recyclingInstructions || "Details have been added to your report.",
-            variant: result.isHazardous ? 'destructive' : 'default',
+          title: `AI Analysis: ${result.wasteType}`,
+          description: result.recyclingInstructions || "Details have been added to your report.",
+          variant: result.isHazardous ? 'destructive' : 'default',
         });
       });
     }
@@ -148,19 +161,19 @@ export function TagLitterForm() {
       console.error("Error accessing camera:", error);
       setHasCameraPermission(false);
       setIsCameraOpen(false);
-      
+
       let title = "Camera Error";
       let description = "An unexpected error occurred while accessing the camera.";
 
       if (error.name === 'NotAllowedError') {
-          title = "Camera Access Denied";
-          description = "Please enable camera permissions in your browser settings to use this feature.";
+        title = "Camera Access Denied";
+        description = "Please enable camera permissions in your browser settings to use this feature.";
       } else if (error.name === 'NotFoundError') {
-          title = "No Camera Found";
-          description = "We couldn't find a camera on your device. Please connect a camera and try again.";
+        title = "No Camera Found";
+        description = "We couldn't find a camera on your device. Please connect a camera and try again.";
       } else if (error.name === 'NotReadableError') {
-          title = "Could Not Access Camera";
-          description = "Could not start video source. The camera might be in use by another application or there might be a hardware issue.";
+        title = "Could Not Access Camera";
+        description = "Could not start video source. The camera might be in use by another application or there might be a hardware issue.";
       }
 
       toast({
@@ -200,8 +213,8 @@ export function TagLitterForm() {
   };
 
   const handleCancelCamera = () => {
-      setIsCameraOpen(false);
-      stopCameraStream();
+    setIsCameraOpen(false);
+    stopCameraStream();
   }
 
   const handleTakePicture = () => {
@@ -237,25 +250,67 @@ export function TagLitterForm() {
       return;
     }
     setIsSubmitting(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    setIsSubmitting(false);
-    setSubmissionStatus("success");
-    if(tag === 'hazardous') {
-        toast({
+    setIsSubmitting(true);
+
+    try {
+      const reportResult = await submitReport({
+        location: manualAddress || location || "Unknown Location",
+        description: description,
+        wasteType: aiResult?.wasteType || "Unidentified",
+        isHazardous: tag === 'hazardous',
+        recyclingInstructions: aiResult?.recyclingInstructions,
+        hazardousMaterials: aiResult?.hazardousMaterials,
+        cleanupGuidelines: aiResult?.cleanupGuidelines,
+        // In a real app, upload the image to storage and pass the URL. 
+        // Passing the data URI to the server action for now (be mindful of payload size limits).
+        imageDataUri: imageDataUri || undefined,
+        lat: coords?.lat,
+        lng: coords?.lng
+      });
+
+      if (reportResult.success) {
+        // Update local session data for the demo
+        const uid = user?.uid || 'guest';
+        const storageKey = `ecosort_session_${uid}`;
+        const savedData = localStorage.getItem(storageKey);
+        let session = savedData ? JSON.parse(savedData) : { reports: 0, points: 0, level: 1, hasActivity: true };
+
+        session.reports = (session.reports || 0) + 1;
+        session.points = (session.points || 0) + 100;
+        session.level = Math.floor(session.points / 500) + 1;
+        session.hasActivity = true;
+
+        localStorage.setItem(storageKey, JSON.stringify(session));
+
+        setSubmissionStatus("success");
+        if (tag === 'hazardous') {
+          toast({
             variant: "destructive",
             title: "⚠️ Hazardous Litter Reported",
             description: "A priority alert has been sent to the authorities. Thank you for your vigilance.",
             duration: 9000,
-        });
-    } else {
-        toast({
+          });
+        } else {
+          toast({
             title: "✅ Report Submitted",
             description: "Thank you for helping keep our city clean!",
-        });
+          });
+        }
+      } else {
+        throw new Error((reportResult as any).message || "Submission failed");
+      }
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Submission Failed",
+        description: "There was a problem submitting your report. Please try again.",
+      });
+      console.error(error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
-  
+
   const resetForm = () => {
     setImagePreview(null);
     setImageDataUri(null);
@@ -264,10 +319,13 @@ export function TagLitterForm() {
     setSubmissionStatus("idle");
     setAiResult(null);
     setIsCameraOpen(false);
+    setIsCameraOpen(false);
     setLocation(null);
+    setCoords(null);
     setIsLocating(false);
     stopCameraStream();
-    if(fileInputRef.current) fileInputRef.current.value = "";
+    setManualAddress("");
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   if (submissionStatus === "success") {
@@ -291,7 +349,7 @@ export function TagLitterForm() {
               </Link>
             </Button>
           </div>
-            <Button variant="link" onClick={resetForm} className="mt-4">Submit Another Report</Button>
+          <Button variant="link" onClick={resetForm} className="mt-4">Submit Another Report</Button>
         </CardContent>
       </Card>
     );
@@ -328,17 +386,27 @@ export function TagLitterForm() {
                 </div>
               </div>
             ) : !imagePreview ? (
-              <div className="relative w-full aspect-video border-2 border-dashed border-muted-foreground/50 rounded-lg flex flex-col items-center justify-center text-center p-4">
-                <Camera className="h-12 w-12 text-muted-foreground mb-2" />
-                <h3 className="font-semibold mb-2">Large Photo Capture Area</h3>
-                <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" className="hidden" />
-                <div className="flex flex-col sm:flex-row gap-4 mt-4">
-                  <Button type="button" onClick={handleUploadClick}>
-                    <Upload /> Upload Photo
-                  </Button>
-                  <Button type="button" variant="secondary" onClick={handleCapturePhotoClick}>
-                    <Camera /> Capture Photo
-                  </Button>
+              <div className="relative w-full aspect-video border-2 border-dashed border-primary/30 rounded-xl flex flex-col items-center justify-center text-center p-8 bg-primary/5 hover:bg-primary/10 transition-all group/upload cursor-pointer overflow-hidden">
+                <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mb-4 group-hover/upload:scale-110 transition-transform shadow-inner">
+                  <Camera className="h-8 w-8 text-primary" />
+                </div>
+                <h3 className="font-black text-xl tracking-tight text-primary">Capture or Upload</h3>
+                <p className="text-sm text-muted-foreground mt-2 max-w-[200px]">Click anywhere to take a photo or upload from your device</p>
+
+                <input
+                  type="file"
+                  onChange={handleFileChange}
+                  accept="image/*"
+                  className="absolute inset-0 opacity-0 cursor-pointer z-20 w-full h-full"
+                />
+
+                <div className="flex gap-4 mt-6 pointer-events-none">
+                  <div className="flex items-center gap-2 bg-background/80 backdrop-blur px-4 py-2 rounded-full border text-xs font-bold shadow-sm">
+                    <Upload className="h-4 w-4" /> BROWSE
+                  </div>
+                  <div className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-full text-xs font-bold shadow-md">
+                    <Camera className="h-4 w-4" /> CAPTURE
+                  </div>
                 </div>
               </div>
             ) : (
@@ -377,54 +445,61 @@ export function TagLitterForm() {
                 </div>
 
                 {isAnalyzing && (
-                    <div className="flex items-center gap-2 text-muted-foreground p-4 bg-muted rounded-md">
-                        <Loader2 className="h-5 w-5 animate-spin" />
-                        <span>AI is analyzing the image...</span>
-                    </div>
+                  <div className="flex items-center gap-2 text-muted-foreground p-4 bg-muted rounded-md">
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    <span>AI is analyzing the image...</span>
+                  </div>
                 )}
 
                 {aiResult && !isAnalyzing && (
-                    <>
+                  <>
                     <Alert variant={aiResult.isHazardous ? "destructive" : "default"}>
-                        {aiResult.isHazardous ? <ShieldAlert className="h-4 w-4" /> : <Info className="h-4 w-4" />}
-                        <AlertTitle>AI Analysis: {aiResult.wasteType}</AlertTitle>
-                        <AlertDescription>
-                            {aiResult.recyclingInstructions}
-                            {aiResult.isHazardous && aiResult.hazardousMaterials && aiResult.hazardousMaterials.length > 0 && (
-                            <div className="mt-2">
-                                <strong>Identified Hazards: </strong> 
-                                {aiResult.hazardousMaterials.map((mat) => (
-                                <Badge key={mat} variant="destructive" className="mr-1">
-                                    {mat}
-                                </Badge>
-                                ))}
-                            </div>
-                            )}
-                        </AlertDescription>
+                      {aiResult.isHazardous ? <ShieldAlert className="h-4 w-4" /> : <Info className="h-4 w-4" />}
+                      <AlertTitle>AI Analysis: {aiResult.wasteType}</AlertTitle>
+                      <AlertDescription>
+                        {aiResult.recyclingInstructions}
+                        {aiResult.isHazardous && aiResult.hazardousMaterials && aiResult.hazardousMaterials.length > 0 && (
+                          <div className="mt-2">
+                            <strong>Identified Hazards: </strong>
+                            {aiResult.hazardousMaterials.map((mat) => (
+                              <Badge key={mat} variant="destructive" className="mr-1">
+                                {mat}
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
+                      </AlertDescription>
                     </Alert>
                     {aiResult.cleanupGuidelines && aiResult.cleanupGuidelines.length > 0 && (
-                        <Alert variant="default" className="mt-4">
-                            <ClipboardCheck className="h-4 w-4" />
-                            <AlertTitle>Cleanup Guidelines</AlertTitle>
-                            <AlertDescription>
-                                <ul className="list-disc pl-5 space-y-1 text-foreground">
-                                    {aiResult.cleanupGuidelines.map((guideline, index) => (
-                                        <li key={index}>{guideline.replace(/^\d+\.\s*/, '')}</li>
-                                    ))}
-                                </ul>
-                            </AlertDescription>
-                        </Alert>
+                      <Alert variant="default" className="mt-4">
+                        <ClipboardCheck className="h-4 w-4" />
+                        <AlertTitle>Cleanup Guidelines</AlertTitle>
+                        <AlertDescription>
+                          <ul className="list-disc pl-5 space-y-1 text-foreground">
+                            {aiResult.cleanupGuidelines.map((guideline, index) => (
+                              <li key={index}>{guideline.replace(/^\d+\.\s*/, '')}</li>
+                            ))}
+                          </ul>
+                        </AlertDescription>
+                      </Alert>
                     )}
-                    </>
+                  </>
                 )}
-                
+
                 <div>
                   <h3 className="font-semibold mb-2">Location</h3>
-                  <div className="flex items-center gap-2 p-3 bg-muted rounded-md text-muted-foreground">
-                    <MapPin className="h-5 w-5 text-primary" />
-                    <span>
-                      {isLocating ? "Detecting location..." : (location || "Location will be detected from your browser.")}
-                    </span>
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center gap-2 p-3 bg-muted rounded-md text-muted-foreground">
+                      <MapPin className="h-5 w-5 text-primary" />
+                      <span>
+                        {isLocating ? "Detecting location..." : (location || "Auto-location depends on browser permissions.")}
+                      </span>
+                    </div>
+                    <Input
+                      placeholder="Or enter manual address/landmark (e.g. 'Near Central Park Gate 2')"
+                      value={manualAddress}
+                      onChange={(e) => setManualAddress(e.target.value)}
+                    />
                   </div>
                 </div>
 
