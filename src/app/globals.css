@@ -4,67 +4,77 @@
 
 @layer base {
   :root {
-    /* Base - Dark Green Background, Orange Text */
-    --background: 155 70% 6%; /* Deep localized Forest Green */
-    --foreground: 35 100% 65%; /* Bright Orange Text */
-
-    /* Cards & Surfaces */
-    --card: 155 60% 12%; /* Slightly lighter green for cards */
-    --card-foreground: 35 100% 65%;
-    
-    --popover: 155 60% 12%;
-    --popover-foreground: 35 100% 65%;
-
-    /* Primary Actions */
-    --primary: 30 100% 50%; /* Pure Orange */
-    --primary-foreground: 155 70% 10%; /* Dark text on orange buttons */
-
-    /* Secondary / Muted */
-    --secondary: 155 40% 18%;
-    --secondary-foreground: 35 90% 75%;
-    
-    --muted: 155 30% 15%;
-    --muted-foreground: 35 60% 60%;
-
-    /* Accents */
-    --accent: 155 50% 25%;
-    --accent-foreground: 30 100% 60%;
-
-    /* Borders & Inputs */
-    --border: 155 40% 25%;
-    --input: 155 40% 25%;
-    --ring: 30 100% 50%; /* Orange focus ring */
-
-    /* System */
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
+    --background: 220 20% 97%;
+    --foreground: 220 20% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 20% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 20% 10%;
+    --primary: 152 68% 45%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 14% 92%;
+    --secondary-foreground: 220 20% 20%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 10% 46%;
+    --accent: 262 68% 56%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 152 68% 45%;
     --radius: 0.75rem;
+    --chart-1: 152 68% 45%;
+    --chart-2: 262 68% 56%;
+    --chart-3: 30 95% 55%;
+    --chart-4: 200 80% 55%;
+    --chart-5: 340 70% 55%;
+    --sidebar-background: 220 20% 12%;
+    --sidebar-foreground: 220 10% 80%;
+    --sidebar-primary: 152 68% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 15% 18%;
+    --sidebar-accent-foreground: 152 68% 50%;
+    --sidebar-border: 220 15% 20%;
+    --sidebar-ring: 152 68% 50%;
   }
- 
+
   .dark {
-    /* Keep the same theme for dark mode so it persists */
-    --background: 155 70% 6%;
-    --foreground: 35 100% 65%;
-    --card: 155 60% 12%;
-    --card-foreground: 35 100% 65%;
-    --popover: 155 60% 12%;
-    --popover-foreground: 35 100% 65%;
-    --primary: 30 100% 50%;
-    --primary-foreground: 155 70% 10%;
-    --secondary: 155 40% 18%;
-    --secondary-foreground: 35 90% 75%;
-    --muted: 155 30% 15%;
-    --muted-foreground: 35 60% 60%;
-    --accent: 155 50% 25%;
-    --accent-foreground: 30 100% 60%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 155 40% 25%;
-    --input: 155 40% 25%;
-    --ring: 30 100% 50%;
+    --background: 220 20% 7%;
+    --foreground: 220 10% 92%;
+    --card: 220 20% 10%;
+    --card-foreground: 220 10% 92%;
+    --popover: 220 20% 10%;
+    --popover-foreground: 220 10% 92%;
+    --primary: 152 68% 50%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 15% 16%;
+    --secondary-foreground: 220 10% 85%;
+    --muted: 220 15% 14%;
+    --muted-foreground: 220 10% 55%;
+    --accent: 262 68% 60%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 15% 18%;
+    --input: 220 15% 18%;
+    --ring: 152 68% 50%;
+    --chart-1: 152 68% 50%;
+    --chart-2: 262 68% 60%;
+    --chart-3: 30 95% 60%;
+    --chart-4: 200 80% 60%;
+    --chart-5: 340 70% 60%;
+    --sidebar-background: 220 20% 7%;
+    --sidebar-foreground: 220 10% 75%;
+    --sidebar-primary: 152 68% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 15% 12%;
+    --sidebar-accent-foreground: 152 68% 50%;
+    --sidebar-border: 220 15% 14%;
+    --sidebar-ring: 152 68% 50%;
   }
 }
- 
+
 @layer base {
   * {
     @apply border-border;
@@ -73,10 +83,85 @@
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
+  html {
+    scroll-behavior: smooth;
+  }
 }
 
 @layer utilities {
-  .glassmorphism {
-    @apply bg-card/60 backdrop-blur-xl border-white/20;
+  .glass {
+    @apply bg-white/5 backdrop-blur-xl border border-white/10 shadow-xl;
   }
+  .glass-card {
+    @apply bg-white/[0.03] backdrop-blur-2xl border border-white/[0.08] shadow-2xl;
+  }
+  .glass-strong {
+    @apply bg-white/10 backdrop-blur-2xl border border-white/15 shadow-2xl;
+  }
+  .gradient-primary {
+    @apply bg-gradient-to-br from-emerald-500 via-emerald-600 to-teal-700;
+  }
+  .gradient-accent {
+    @apply bg-gradient-to-br from-violet-500 via-purple-600 to-indigo-700;
+  }
+  .gradient-warm {
+    @apply bg-gradient-to-br from-amber-500 via-orange-500 to-rose-500;
+  }
+  .gradient-text {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-teal-300;
+  }
+  .glow-primary {
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.15), 0 0 60px rgba(16, 185, 129, 0.05);
+  }
+  .glow-accent {
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.15), 0 0 60px rgba(139, 92, 246, 0.05);
+  }
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+  .animate-pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted)) transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--muted));
+    border-radius: 20px;
+  }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* Leaflet overrides for dark theme */
+.leaflet-container {
+  background: hsl(220, 20%, 10%) !important;
+  border-radius: 0.75rem;
+}
+
+.leaflet-popup-content-wrapper {
+  background: hsl(220, 20%, 10%) !important;
+  color: hsl(220, 10%, 92%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 0.75rem !important;
+  backdrop-filter: blur(20px) !important;
+}
+
+.leaflet-popup-tip {
+  background: hsl(220, 20%, 10%) !important;
 }

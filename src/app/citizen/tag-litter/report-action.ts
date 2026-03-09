@@ -1,8 +1,8 @@
 "use server";
 
 import { db, storage } from "@/lib/firebase";
-import { collection, addDoc, serverTimestamp } from "@firebase/firestore";
-import { ref, uploadString, getDownloadURL } from "@firebase/storage";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { ref, uploadString, getDownloadURL } from "firebase/storage";
 import { revalidatePath } from "next/cache";
 
 export type ReportData = {

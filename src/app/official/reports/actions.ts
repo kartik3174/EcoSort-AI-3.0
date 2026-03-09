@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/lib/firebase";
-import { collection, getDocs, orderBy, query } from "@firebase/firestore";
+import { collection, getDocs, orderBy, query } from "firebase/firestore";
 
 export type Report = {
     id: string;
