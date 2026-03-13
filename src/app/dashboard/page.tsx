@@ -130,11 +130,11 @@ export default function DashboardPage() {
                     return (
                         <motion.div
                             key={stat.title}
-                            whileHover={{ y: -4, scale: 1.02 }}
+                            whileHover={{ y: -8, scale: 1.03 }}
                             transition={{ type: "spring", stiffness: 400, damping: 25 }}
                         >
-                            <Card className={`relative overflow-hidden border-white/[0.06] bg-gradient-to-br ${colorMap[stat.color]} backdrop-blur-xl`}>
-                                <div className="absolute top-0 right-0 w-20 h-20 bg-white/[0.02] rounded-full -translate-y-6 translate-x-6" />
+                            <Card className={`relative overflow-hidden border-[1px] border-white/[0.1] bg-gradient-to-br ${colorMap[stat.color]} backdrop-blur-xl shadow-xl hover:shadow-[0_0_40px_rgba(var(--primary),0.1)] transition-all duration-300 ease-in-out group`}>
+                                <div className="absolute top-0 right-0 w-24 h-24 bg-white/[0.03] rounded-full -translate-y-8 translate-x-8 group-hover:scale-125 transition-transform duration-500" />
                                 <CardContent className="p-5">
                                     <div className="flex items-start justify-between">
                                         <div>
@@ -162,8 +162,9 @@ export default function DashboardPage() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                 {/* Daily Reports Chart */}
                 <motion.div variants={itemVariants} className="lg:col-span-2">
-                    <Card className="border-white/[0.06] bg-white/[0.02] backdrop-blur-xl">
-                        <CardHeader className="pb-2">
+                    <Card className="border-white/[0.1] bg-white/[0.02] backdrop-blur-xl hover:shadow-[0_0_30px_rgba(255,255,255,0.03)] transition-all duration-500 overflow-hidden relative">
+                         <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500/0 via-emerald-500/10 to-teal-500/0 opacity-0 hover:opacity-100 transition-opacity duration-700 blur" />
+                        <CardHeader className="pb-2 relative z-10">
                             <div className="flex items-center justify-between">
                                 <div>
                                     <CardTitle className="text-sm font-semibold text-white">Daily Waste Reports</CardTitle>
@@ -299,7 +300,7 @@ export default function DashboardPage() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                 {/* Recent Activity */}
                 <motion.div variants={itemVariants} className="lg:col-span-1">
-                    <Card className="border-white/[0.06] bg-white/[0.02] backdrop-blur-xl h-full">
+                    <Card className="border-white/[0.1] bg-white/[0.02] backdrop-blur-xl h-full hover:border-white/[0.15] hover:shadow-lg transition-all duration-300">
                         <CardHeader className="pb-2">
                             <CardTitle className="text-sm font-semibold text-white">Recent Activity</CardTitle>
                             <p className="text-xs text-white/40">Latest platform updates</p>
@@ -336,7 +337,7 @@ export default function DashboardPage() {
 
                 {/* Hazardous Alerts */}
                 <motion.div variants={itemVariants}>
-                    <Card className="border-white/[0.06] bg-white/[0.02] backdrop-blur-xl h-full">
+                    <Card className="border-white/[0.1] bg-white/[0.02] backdrop-blur-xl h-full hover:border-rose-500/20 hover:shadow-[0_0_20px_rgba(225,29,72,0.1)] transition-all duration-300">
                         <CardHeader className="pb-2">
                             <div className="flex items-center justify-between">
                                 <CardTitle className="text-sm font-semibold text-white">Hazardous Alerts</CardTitle>
@@ -378,7 +379,7 @@ export default function DashboardPage() {
 
                 {/* Quick Stats */}
                 <motion.div variants={itemVariants}>
-                    <Card className="border-white/[0.06] bg-white/[0.02] backdrop-blur-xl h-full">
+                    <Card className="border-white/[0.1] bg-white/[0.02] backdrop-blur-xl h-full hover:border-white/[0.15] hover:shadow-lg transition-all duration-300">
                         <CardHeader className="pb-2">
                             <CardTitle className="text-sm font-semibold text-white">Quick Metrics</CardTitle>
                             <p className="text-xs text-white/40">Platform performance</p>
