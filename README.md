@@ -108,6 +108,7 @@ Improve waste reporting efficiency
 Enable smart city waste analytics
 Encourage citizen participation
 Promote environmental sustainability
+Updated UI animations
 
 👨‍💻 Contributors
 Kartik Singh
